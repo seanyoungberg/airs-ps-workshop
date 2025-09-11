@@ -1,0 +1,49 @@
+# Generated files
+gen/
+
+# Terraform
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/*.tfplan
+terraform/.terraform.tfstate.lock.info
+*.tfvars
+
+
+# Private and local files
+.private/
+.claude/
+.mcp.json
+CLAUDE.md
+
+# Environment variables
+.env
+.env.*
+*.env
+
+# Credentials and secrets
+**/credentials.json
+**/service-account.json
+**/key.json
+**/*.pem
+**/*.key
+**/*.crt
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/

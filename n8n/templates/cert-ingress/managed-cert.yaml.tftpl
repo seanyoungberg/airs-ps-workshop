@@ -1,0 +1,9 @@
+# Managed Certificate for automatic SSL/TLS provisioning
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: ${CERT_NAME}
+  namespace: default
+spec:
+  domains:
+    - ${DOMAIN}

@@ -1,0 +1,24 @@
+# Ingress for multiple applications with path-based routing
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ${INGRESS_NAME}
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.global-static-ip-name: ${STATIC_IP_NAME}
+    networking.gke.io/managed-certificates: ${MANAGED_CERT_NAME}
+spec:
+  rules:
+  - host: ${DOMAIN}
+    http:
+      paths:
+%{ for app in APPS ~}
+      - path: ${app.path}
+        pathType: ${app.path_type}
+        backend:
+          service:
+            name: ${app.service_name}
+            port:
+              number: ${app.service_port}
+%{ endfor ~}
