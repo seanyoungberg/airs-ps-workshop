@@ -44,3 +44,9 @@ resource "local_file" "n8n_service_values_file" {
   )
   filename = "${path.module}/../gen/n8n-service-type-${lower(each.value)}.yaml"
 }
+
+# Generate NodePort with NEG annotation for GKE ingress
+resource "local_file" "n8n_service_nodeport_neg_values_file" {
+  content = file("${path.module}/../templates/n8n/service-type-nodeport-neg.yaml.tftpl")
+  filename = "${path.module}/../gen/n8n-service-type-nodeport-neg.yaml"
+}
