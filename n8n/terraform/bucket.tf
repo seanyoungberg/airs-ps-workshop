@@ -12,9 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+resource "random_string" "bucket_suffix" {
+  length  = 6
+  special = false
+  upper   = false
+}
 
 locals {
-  ollama_bucket_name          = var.ollama_bucket_name != "" ? var.ollama_bucket_name : var.default_resource_name
+  ollama_bucket_name          = var.ollama_bucket_name != "" ? var.ollama_bucket_name : "${var.default_resource_name}-${random_string.bucket_suffix.result}"
   ollama_service_account_name = var.ollama_service_account_name != "" ? var.ollama_service_account_name : var.default_resource_name
 }
 

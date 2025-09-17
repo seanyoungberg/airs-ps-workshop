@@ -1,0 +1,9 @@
+main:
+  config:
+    n8n:
+      # Enable basic authentication for initial setup
+      basic:
+        auth:
+          active: "true"
+          user: "${BASIC_AUTH_USER}"
+          password: "${BASIC_AUTH_PASSWORD}"

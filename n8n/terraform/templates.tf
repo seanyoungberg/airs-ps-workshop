@@ -50,3 +50,24 @@ resource "local_file" "n8n_service_nodeport_neg_values_file" {
   content = file("${path.module}/../templates/n8n/service-type-nodeport-neg.yaml.tftpl")
   filename = "${path.module}/../gen/n8n-service-type-nodeport-neg.yaml"
 }
+
+# Generate basic auth credentials for initial n8n setup
+resource "random_password" "n8n_basic_auth_password" {
+  length  = 16
+  special = true
+}
+
+resource "local_file" "n8n_basic_auth_values_file" {
+  content = templatefile(
+    "${path.module}/../templates/n8n/basic-auth-values.yaml.tftpl",
+    {
+      BASIC_AUTH_USER     = "admin"
+      BASIC_AUTH_PASSWORD = random_password.n8n_basic_auth_password.result
+    }
+  )
+  filename = "${path.module}/../gen/n8n-basic-auth-values.yaml"
+  
+  provisioner "local-exec" {
+    command = "echo 'N8N Basic Auth Credentials:\nUsername: admin\nPassword: ${random_password.n8n_basic_auth_password.result}' > ${path.module}/../gen/n8n-credentials.txt"
+  }
+}

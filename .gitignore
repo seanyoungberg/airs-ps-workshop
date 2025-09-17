@@ -12,6 +12,8 @@ gen/
 **/.terraform.tfstate.lock.info
 *.tfvars
 terraform.tfvars
+**/backend.tf
+!**/backend.tf.example
 
 
 # Private and local files
