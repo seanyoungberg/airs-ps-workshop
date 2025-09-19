@@ -21,6 +21,7 @@ terraform.tfvars
 .claude/
 .mcp.json
 CLAUDE.md
+AGENTS.md
 
 # Environment variables
 .env
