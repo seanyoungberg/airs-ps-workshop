@@ -179,3 +179,14 @@ terraform destroy -target=google_compute_global_address.cert_ingress_ip
 ### Follow-On Ideas
 - Enable shared certificate for multiple services via NEG + path routing.
 - Consider automating manifest generation without relying on `n8n/gen/` artefacts long term.
+
+## Deployment Validation — 2025-09-19
+
+- Reconnected to private Autopilot cluster via fleet membership; installed `gke-gcloud-auth-plugin` and ensured PATH includes `/opt/homebrew/share/google-cloud-sdk/bin` for credential plugin availability.
+- Ran `terraform plan -var-file=terraform.tfvars` (no changes) confirming infra state matches configuration; static IP `workshop-ip-me56` still reserved at `35.244.185.70`.
+- Observed missing `Ingress`, `ManagedCertificate`, and `n8n` workloads; only `ollama` deployment remained. No global forwarding rules present prior to remediation.
+- Reinstalled Helm release: `helm upgrade --install n8n ... -f gen/n8n-common-values.yaml -f gen/n8n-service-type-nodeport-neg.yaml` bringing `n8n` deployment and NodePort service (NEG-enabled) back online.
+- Reapplied ingress assets via workshop instructions: `kubectl apply -f gen/cert-ingress-managed-cert.yaml` and `kubectl apply -f gen/cert-ingress-ingress.yaml`.
+- Current status: `workshop-ingress` serving `35.244.185.70`; managed certificate `workshop-managed-cert` provisioning (allow 15–30 minutes to reach `Active`). Global forwarding rules `k8s2-fr-7geqogmt-…` present; `n8n` pod running (multiple restarts during bootstrap expected).
+- Next check: monitor certificate readiness (`kubectl get managedcertificate workshop-managed-cert -n default`) and validate HTTPS once status transitions to `Active` (`https://35.244.185.70.sslip.io`).
+- Follow-up: Applied Helm upgrade with `-f gen/n8n-basic-auth-values.yaml` so Terraform-generated credentials gate initial n8n login; updated `n8n/WORKSHOP.md` to call out the extra values file and instruct participants to read `../gen/n8n-credentials.txt` post-apply.

@@ -3,6 +3,9 @@
 This file provides the playbook for working in this repo with Codex CLI and other agents. Keep it simple, predictable, and reproducible.
 
 ## How Agents Collaborate
+
+**IMPORTANT: YOU MUST TRACK ANY ACTIONS TAKEN AND STATUS OF TASKS IN ./private/PLAN.md**
+
 - Prefer small, focused changes with a visible plan. Use the plan tool to outline steps, keep exactly one step in progress, and mark steps complete when done.
 - Announce grouped actions before running commands (e.g., repo scan, patching docs). Use `rg` for searches and read files in chunks to stay fast.
 - Edit files with minimal diffs. Avoid renames or restructures unless requested. Don’t add formatters or unrelated fixes.

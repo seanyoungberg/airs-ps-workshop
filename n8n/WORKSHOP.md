@@ -124,17 +124,21 @@ kubectl get svc ollama
 Our improved configuration includes NodePort with NEG annotation pre-configured:
 
 ```bash
-# Install n8n via Helm with NEG-enabled NodePort
+# Install n8n via Helm with NEG-enabled NodePort and Terraform-generated basic auth
 helm install n8n oci://8gears.container-registry.com/library/n8n \
     --version 1.0.10 \
     -f ../gen/n8n-common-values.yaml \
-    -f ../gen/n8n-service-type-nodeport-neg.yaml
+    -f ../gen/n8n-service-type-nodeport-neg.yaml \
+    -f ../gen/n8n-basic-auth-values.yaml
 
 # Wait for deployment
 kubectl rollout status deployment/n8n
 
 # Verify service has NEG annotation
 kubectl get svc n8n -o yaml | grep neg
+
+# Retrieve the generated HTTP basic-auth credentials
+cat ../gen/n8n-credentials.txt
 ```
 
 ## Step 8: Deploy Certificate and Ingress
@@ -172,8 +176,8 @@ watch -n 30 kubectl get managedcertificate workshop-managed-cert -n default
 
 ### Initial Setup
 1. Access n8n via the HTTP URL initially
-2. Create your admin account
-3. Complete the initial setup wizard
+2. Sign in with the credentials from `../gen/n8n-credentials.txt`
+3. Create your admin account and complete the initial setup wizard
 
 ### Database Credentials
 Get the database password for the workflow configuration:
