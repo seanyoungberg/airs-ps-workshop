@@ -139,6 +139,9 @@ kubectl get svc n8n -o yaml | grep neg
 
 # Retrieve the generated HTTP basic-auth credentials
 cat ../gen/n8n-credentials.txt
+
+# Retrieve the generated owner credentials
+cat ../gen/n8n-owner-credentials.txt
 ```
 
 ## Step 8: Deploy Certificate and Ingress
@@ -158,7 +161,28 @@ echo "Domain: ${STATIC_IP}.sslip.io"
 kubectl get managedcertificate workshop-managed-cert -n default
 ```
 
-## Step 9: Access n8n
+## Step 9: Bootstrap the n8n Owner Account
+
+Terraform renders a one-shot job to promote the generated credentials to the instance owner.
+
+```bash
+# Review credentials from Terraform outputs (also stored in ../gen/n8n-owner-credentials.txt)
+cd terraform
+terraform output n8n_owner_email
+terraform output n8n_owner_password
+cd ..
+
+# Apply the owner bootstrap secret + job (idempotent)
+kubectl apply -f ../gen/n8n-owner-bootstrap.yaml
+
+# Watch job logs until it reports success (Ctrl+C when complete)
+kubectl logs job/n8n-owner-bootstrap --follow
+
+# Optional: clean up the job while leaving the secret for reference
+kubectl delete job n8n-owner-bootstrap --ignore-not-found
+```
+
+## Step 10: Access n8n
 
 ### Check Certificate Status
 ```bash
@@ -172,12 +196,13 @@ watch -n 30 kubectl get managedcertificate workshop-managed-cert -n default
 - **HTTP** (available immediately): `http://<STATIC_IP>.sslip.io`
 - **HTTPS** (after cert provisions): `https://<STATIC_IP>.sslip.io`
 
-## Step 10: Configure n8n
+## Step 11: Configure n8n
 
 ### Initial Setup
-1. Access n8n via the HTTP URL initially
-2. Sign in with the credentials from `../gen/n8n-credentials.txt`
-3. Create your admin account and complete the initial setup wizard
+1. Access n8n via the HTTPS URL (or HTTP while the certificate provisions).
+2. When prompted for HTTP basic authentication, use `admin` plus the password from `../gen/n8n-credentials.txt`.
+3. On the n8n sign-in screen, use the owner email and password from `../gen/n8n-owner-credentials.txt`.
+4. Update the owner profile as needed after login.
 
 ### Database Credentials
 Get the database password for the workflow configuration:
@@ -210,7 +235,7 @@ echo "Database Password: $DB_PASSWORD"
    - Password: `<Password from above>`
 3. Save the credential
 
-## Step 11: Import Sample Workflow
+## Step 12: Import Sample Workflow
 
 1. In n8n, click "New Workflow"
 2. Click the menu → Import from File
@@ -218,7 +243,7 @@ echo "Database Password: $DB_PASSWORD"
 4. Update the Ollama and Postgres credentials in the workflow nodes
 5. Save and activate the workflow
 
-## Step 12: Test the AI Workflow
+## Step 13: Test the AI Workflow
 
 1. Click the "Chat" button at the bottom of the canvas
 2. Try these prompts:

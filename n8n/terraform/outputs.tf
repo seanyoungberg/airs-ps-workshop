@@ -44,3 +44,23 @@ output "cloudsql_db_user" {
 output "cloudsql_db_name" {
   value = local.cloudsql_db_name
 }
+
+output "n8n_basic_auth_username" {
+  value       = "admin"
+  description = "Username for HTTP basic authentication in front of n8n"
+}
+
+output "n8n_basic_auth_password" {
+  value       = nonsensitive(random_password.n8n_basic_auth_password.result)
+  description = "Password for HTTP basic authentication in front of n8n"
+}
+
+output "n8n_owner_email" {
+  value       = var.n8n_owner_email
+  description = "Email address seeded for the n8n owner account"
+}
+
+output "n8n_owner_password" {
+  value       = nonsensitive(random_password.n8n_owner_password.result)
+  description = "Password generated for the n8n owner account"
+}

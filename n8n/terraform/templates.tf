@@ -47,7 +47,7 @@ resource "local_file" "n8n_service_values_file" {
 
 # Generate NodePort with NEG annotation for GKE ingress
 resource "local_file" "n8n_service_nodeport_neg_values_file" {
-  content = file("${path.module}/../templates/n8n/service-type-nodeport-neg.yaml.tftpl")
+  content  = file("${path.module}/../templates/n8n/service-type-nodeport-neg.yaml.tftpl")
   filename = "${path.module}/../gen/n8n-service-type-nodeport-neg.yaml"
 }
 
@@ -66,8 +66,46 @@ resource "local_file" "n8n_basic_auth_values_file" {
     }
   )
   filename = "${path.module}/../gen/n8n-basic-auth-values.yaml"
-  
+
   provisioner "local-exec" {
     command = "echo 'N8N Basic Auth Credentials:\nUsername: admin\nPassword: ${random_password.n8n_basic_auth_password.result}' > ${path.module}/../gen/n8n-credentials.txt"
   }
+}
+
+resource "random_password" "n8n_owner_password" {
+  length      = 20
+  special     = true
+  min_upper   = 1
+  min_lower   = 1
+  min_numeric = 1
+}
+
+resource "local_file" "n8n_owner_credentials_file" {
+  content = templatefile(
+    "${path.module}/../templates/n8n/owner-credentials.txt.tftpl",
+    {
+      OWNER_EMAIL    = var.n8n_owner_email
+      OWNER_PASSWORD = random_password.n8n_owner_password.result
+    }
+  )
+  filename = "${path.module}/../gen/n8n-owner-credentials.txt"
+}
+
+resource "local_file" "n8n_owner_bootstrap_manifest" {
+  content = templatefile(
+    "${path.module}/../templates/owner/owner-bootstrap.yaml.tftpl",
+    {
+      OWNER_EMAIL         = var.n8n_owner_email
+      OWNER_FIRST_NAME    = var.n8n_owner_first_name
+      OWNER_LAST_NAME     = var.n8n_owner_last_name
+      OWNER_PASSWORD      = random_password.n8n_owner_password.result
+      BASIC_AUTH_USER     = "admin"
+      BASIC_AUTH_PASSWORD = random_password.n8n_basic_auth_password.result
+      OWNER_SECRET_NAME   = "n8n-owner-bootstrap"
+      OWNER_JOB_NAME      = "n8n-owner-bootstrap"
+      N8N_SERVICE_HOST    = "n8n.default.svc.cluster.local"
+      N8N_SERVICE_PORT    = 80
+    }
+  )
+  filename = "${path.module}/../gen/n8n-owner-bootstrap.yaml"
 }

@@ -58,12 +58,12 @@ resource "google_compute_global_address" "cert_ingress_ip" {
 # Locals for domain calculation
 locals {
   cert_ingress_domain = var.cert_ingress_enabled ? (
-    var.custom_domain != "" ? var.custom_domain : 
-    var.use_sslip_io ? "${google_compute_global_address.cert_ingress_ip[0].address}.sslip.io" : 
+    var.custom_domain != "" ? var.custom_domain :
+    var.use_sslip_io ? "${google_compute_global_address.cert_ingress_ip[0].address}.sslip.io" :
     ""
   ) : ""
-  
-  cert_ingress_ip = var.cert_ingress_enabled ? google_compute_global_address.cert_ingress_ip[0].address : ""
+
+  cert_ingress_ip      = var.cert_ingress_enabled ? google_compute_global_address.cert_ingress_ip[0].address : ""
   cert_ingress_ip_name = var.cert_ingress_enabled ? google_compute_global_address.cert_ingress_ip[0].name : ""
 }
 

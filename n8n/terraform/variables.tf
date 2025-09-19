@@ -73,3 +73,21 @@ variable "ollama_service_account_name" {
 variable "ollama_bucket_name" {
   type = string
 }
+
+variable "n8n_owner_email" {
+  description = "Email address to assign to the initial n8n owner account"
+  type        = string
+  default     = "admin@n8n.lab"
+}
+
+variable "n8n_owner_first_name" {
+  description = "First name for the seeded n8n owner account"
+  type        = string
+  default     = "Workshop"
+}
+
+variable "n8n_owner_last_name" {
+  description = "Last name for the seeded n8n owner account"
+  type        = string
+  default     = "Admin"
+}

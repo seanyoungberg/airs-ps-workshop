@@ -1,0 +1,110 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ${OWNER_SECRET_NAME}
+  namespace: default
+  labels:
+    app: n8n-owner-bootstrap
+stringData:
+  owner-email: ${OWNER_EMAIL}
+  owner-password: ${OWNER_PASSWORD}
+  owner-first-name: ${OWNER_FIRST_NAME}
+  owner-last-name: ${OWNER_LAST_NAME}
+  basic-auth-user: ${BASIC_AUTH_USER}
+  basic-auth-password: ${BASIC_AUTH_PASSWORD}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ${OWNER_JOB_NAME}
+  namespace: default
+  labels:
+    app: n8n-owner-bootstrap
+spec:
+  ttlSecondsAfterFinished: 600
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: n8n-owner-bootstrap
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: owner-bootstrap
+          image: curlimages/curl:8.8.0
+          env:
+            - name: OWNER_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: ${OWNER_SECRET_NAME}
+                  key: owner-email
+            - name: OWNER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ${OWNER_SECRET_NAME}
+                  key: owner-password
+            - name: OWNER_FIRST_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: ${OWNER_SECRET_NAME}
+                  key: owner-first-name
+            - name: OWNER_LAST_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: ${OWNER_SECRET_NAME}
+                  key: owner-last-name
+            - name: BASIC_AUTH_USER
+              valueFrom:
+                secretKeyRef:
+                  name: ${OWNER_SECRET_NAME}
+                  key: basic-auth-user
+            - name: BASIC_AUTH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ${OWNER_SECRET_NAME}
+                  key: basic-auth-password
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -euo pipefail
+
+              service_url="http://${N8N_SERVICE_HOST}:${N8N_SERVICE_PORT}"
+
+              echo "Waiting for n8n API..."
+              for attempt in $(seq 1 30); do
+                if curl -ksSf -u "$${BASIC_AUTH_USER}:$${BASIC_AUTH_PASSWORD}" "$${service_url}/healthz" >/dev/null 2>&1; then
+                  break
+                fi
+                echo "Attempt $${attempt}/30: n8n not ready yet, sleeping 5s"
+                sleep 5
+              done
+
+              if ! curl -ksSf -u "$${BASIC_AUTH_USER}:$${BASIC_AUTH_PASSWORD}" "$${service_url}/healthz" >/dev/null 2>&1; then
+                echo "n8n API did not become ready in time" >&2
+                exit 1
+              fi
+
+              payload=$(printf '{"email":"%s","firstName":"%s","lastName":"%s","password":"%s"}' \
+                "$${OWNER_EMAIL}" "$${OWNER_FIRST_NAME}" "$${OWNER_LAST_NAME}" "$${OWNER_PASSWORD}")
+
+              echo "Submitting owner setup request"
+              http_code=$(curl -ksS -w '%%{http_code}' -o /tmp/owner-response.txt \
+                -u "$${BASIC_AUTH_USER}:$${BASIC_AUTH_PASSWORD}" \
+                -H 'Content-Type: application/json' \
+                -X POST "$${service_url}/rest/owner/setup" \
+                -d "$${payload}" || true)
+
+              if [ "$${http_code}" = "200" ]; then
+                echo "Owner setup completed successfully"
+                exit 0
+              fi
+
+              if [ "$${http_code}" = "400" ] && grep -q 'Instance owner already setup' /tmp/owner-response.txt; then
+                echo "Owner already configured, nothing to do"
+                exit 0
+              fi
+
+              echo "Owner setup failed with status $${http_code}" >&2
+              cat /tmp/owner-response.txt >&2
+              exit 1
