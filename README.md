@@ -10,3 +10,9 @@ Notes for collaborators:
 - Keep the root README high level. Put lab instructions in `n8n/WORKSHOP.md`.
 - Use `AGENTS.md` for agent workflow and repo rules.
 - Private, non-committed work logs live in `.private/` (see `.private/PLAN.md` and `.private/NOTES.md`).
+
+## Attribution & Upstream Sources
+- Based on Google Cloud’s AI-on-GKE n8n tutorial: <https://gke-ai-labs.dev/docs/agentic/n8n/>
+- Tutorial source content: <https://github.com/ai-on-gke/website/blob/main/site/content/docs/agentic/n8n/index.md>
+- Terraform modules and shared components referenced from <https://github.com/ai-on-gke/tutorials-and-examples> and <https://github.com/ai-on-gke/common-infra>
+- Main divergence: replaces Identity-Aware Proxy (IAP) with Google-managed certificate ingress to fit Okta SSO constraints

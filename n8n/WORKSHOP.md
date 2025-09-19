@@ -13,6 +13,9 @@ In this workshop, you'll deploy n8n workflow automation on Google Kubernetes Eng
 - Certificate provisioning: 15-30 minutes
 - Application deployment: 5 minutes
 
+### Upstream Source
+This workshop adapts the Google Cloud AI-on-GKE n8n tutorial (<https://gke-ai-labs.dev/docs/agentic/n8n/>) and its Terraform configuration (<https://github.com/ai-on-gke/website/blob/main/site/content/docs/agentic/n8n/index.md>). We reuse shared modules from <https://github.com/ai-on-gke/tutorials-and-examples> and <https://github.com/ai-on-gke/common-infra>, but replace the original Identity-Aware Proxy (IAP) ingress pattern with Google-managed certificates to accommodate environments that cannot use IAP.
+
 ## Prerequisites
 
 ### Required Tools

@@ -18,6 +18,11 @@ This file provides the playbook for working in this repo with Codex CLI and othe
 - Operational scripts for a module live at the module root (e.g., `n8n/deploy-cert-ingress.sh`).
 - Human-facing workshop collateral for the n8n lab lives in `n8n/WORKSHOP.md`.
 
+## Upstream References
+- Current lab forked from Google Cloud’s AI-on-GKE n8n tutorial: <https://gke-ai-labs.dev/docs/agentic/n8n/> (source: <https://github.com/ai-on-gke/website/blob/main/site/content/docs/agentic/n8n/index.md>).
+- Terraform uses patterns and modules from <https://github.com/ai-on-gke/tutorials-and-examples> and shared components in <https://github.com/ai-on-gke/common-infra>.
+- Before drafting new infra, check AI-on-GKE modules for reusable pieces. Use the Terraform MCP server to summarize available modules before building anything from scratch.
+
 ## Build & Deploy Commands
 - `cd n8n/terraform && terraform init` to install providers and configure backend state.
 - `terraform plan -var-file=terraform.tfvars` to confirm GKE, Cloud SQL, and certificate changes. Treat a clean plan as a pre-merge requirement.
@@ -59,4 +64,5 @@ This file provides the playbook for working in this repo with Codex CLI and othe
 - Run `terraform fmt`, `terraform validate`, and a targeted `plan` for infra edits.
 - Update `.private/PLAN.md` when work focus changes.
 - Capture durable findings in `.private/NOTES.md` instead of scattering new docs.
+- Review AI-on-GKE upstream repos when planning new scenarios to stay aligned with shared infrastructure patterns.
 - Prefer surgical edits; avoid scope creep.

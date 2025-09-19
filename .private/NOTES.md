@@ -2,6 +2,11 @@
 
 _Last updated: 2025-09-19_
 
+## Upstream References
+- Base tutorial: <https://gke-ai-labs.dev/docs/agentic/n8n/> (source markdown in <https://github.com/ai-on-gke/website/blob/main/site/content/docs/agentic/n8n/index.md>)
+- Terraform modules reused from <https://github.com/ai-on-gke/tutorials-and-examples> and <https://github.com/ai-on-gke/common-infra>
+- Primary fork motivation: replace Identity-Aware Proxy (IAP) with Google-managed certificate ingress compatible with Okta SSO
+
 ## Deployment Log — 2025-09-11 (Project: syoungberg-workshop-test)
 
 ### Improvements Implemented
@@ -174,4 +179,3 @@ terraform destroy -target=google_compute_global_address.cert_ingress_ip
 ### Follow-On Ideas
 - Enable shared certificate for multiple services via NEG + path routing.
 - Consider automating manifest generation without relying on `n8n/gen/` artefacts long term.
-
