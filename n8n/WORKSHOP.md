@@ -61,7 +61,7 @@ gcloud services enable \
 ## Step 3: Configure Terraform
 
 ```bash
-cd terraform
+cd ~/airs-ps-workshop/n8n/terraform
 
 # Update project ID in terraform.tfvars
 sed -i "s/YOUR_PROJECT_ID/$PROJECT_ID/" terraform.tfvars
@@ -83,6 +83,8 @@ This step creates:
 # Initialize Terraform
 terraform init
 
+
+//TODO: Step to copy and update example vars
 # Deploy infrastructure (takes ~15 minutes)
 terraform apply -var-file=terraform.tfvars -auto-approve
 
