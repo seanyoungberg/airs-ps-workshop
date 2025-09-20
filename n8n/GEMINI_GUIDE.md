@@ -25,6 +25,17 @@ Before you start interacting with Gemini, it's important to set up your environm
 
 **Note:** Please do not use the Gemini icon in the IDE side panel. Launching the Gemini CLI from the terminal ensures that it runs in the correct directory and inherits the necessary authentication.
 
+## Important Requirements
+
+When you are working with Gemini to deploy the workshop, please make sure that Gemini performs the following two tasks:
+
+1.  **Create a GCS bucket for Terraform remote state:** The Terraform configuration should be stored in a Google Cloud Storage bucket to ensure that the state is managed centrally and not on your local machine.
+2.  **Use the remote state bucket:** All Terraform deployments should be configured to use the GCS bucket for the remote state. This is crucial for collaboration and for recovering from interruptions.
+
+You can ask Gemini to do this by saying something like:
+
+> "Before we deploy the infrastructure, let's make sure we have a GCS bucket for the Terraform remote state. Can you help me create one and configure Terraform to use it?"
+
 ## Example Prompts and Guidance
 
 The goal of this workshop is to learn by doing. Here are some example prompts to guide you through the deployment process. Don't be afraid to ask your own questions and explore different aspects of the deployment.
