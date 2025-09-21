@@ -6,11 +6,6 @@ Repository for a multi-part workshop on building AI applications and securing th
 - Infra as code: `n8n/terraform/`
 - K8s templates: `n8n/templates/` (Terraform renders temporary manifests into `n8n/gen/`)
 
-Notes for collaborators:
-- Keep the root README high level. Put lab instructions in `n8n/WORKSHOP.md`.
-- Use `AGENTS.md` for agent workflow and repo rules.
-- Private, non-committed work logs live in `.private/` (see `.private/PLAN.md` and `.private/NOTES.md`).
-
 ## Attribution & Upstream Sources
 - Based on Google Cloud’s AI-on-GKE n8n tutorial: <https://gke-ai-labs.dev/docs/agentic/n8n/>
 - Tutorial source content: <https://github.com/ai-on-gke/website/blob/main/site/content/docs/agentic/n8n/index.md>
