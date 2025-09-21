@@ -12,6 +12,8 @@ This guide is for Gemini agents to assist users in deploying the n8n workshop. T
 
 ## Deployment Strategy
 
+You will be executing in a Google Cloud environment that is already authenticated to GCP by the user interacting with you. Use any tool available to assist with making sure the deployment is successful and troubleshooting as needed. Be bold an automomous in your thinking and actions. Use tools to validate status of deployment elements and inform the user of the status and what you are checking.
+
 The deployment process consists of two main phases:
 
 1.  **Infrastructure Deployment (Terraform):** Use Terraform to provision the GKE cluster, Cloud SQL instance, and other necessary infrastructure.
