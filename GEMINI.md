@@ -25,7 +25,7 @@ Here are some common issues that you may encounter during the deployment process
 
 *   **Terraform State Lock:**
     *   **Issue:** An interrupted `terraform apply` can leave a state lock, preventing further operations.
-    *   **Resolution:** Use the `terraform force-unlock <LOCK_ID>` command. You can get the `<LOCK_ID>` from the error message of a failed `terraform plan`.
+    *   **Resolution:** Use the `terraform force-unlock -force <LOCK_ID>` command. You can get the `<LOCK_ID>` from the error message of a failed `terraform plan`.
 
 *   **"Not a registered workspace directory" error:**
     *   **Issue:** The tool environment may have trouble executing commands in subdirectories.
@@ -47,6 +47,25 @@ Here are some common issues that you may encounter during the deployment process
     *   **Issue:** Command substitution (e.g., `$(...)`) is not allowed for security reasons.
     *   **Resolution:** Break the command into two steps. First, get the value and store it. Then, use the value in the next command.
 
+*   **YAML Parsing Errors:**
+    *   **Issue:** The `n8n-owner-bootstrap.yaml` file may fail to apply due to special characters in the password.
+    *   **Resolution:** Edit the `n8n/gen/n8n-owner-bootstrap.yaml` file and wrap the password in quotes.
+
+## Updating the n8n Version
+
+When the user asks to "update n8n" or something similar, they are referring to the n8n application version, which is determined by the Docker image tag. **This is different from the Helm chart version.** Do not attempt to update the Helm chart version unless specifically asked to do so.
+
+The n8n image tag is hardcoded in `n8n/templates/n8n/common-values.yaml.tftpl`. Updating this requires a specific workflow:
+
+1.  **Find the latest n8n image tag:** The most reliable way to do this is to check the n8n GitHub releases page: <https://github.com/n8n-io/n8n/releases>
+2.  **Update the template:** Modify the `image.tag` in `n8n/templates/n8n/common-values.yaml.tftpl` to the new version.
+3.  **Regenerate the configuration:** Run `terraform -chdir=n8n/terraform apply -auto-approve` to update the generated Helm values file (`n8n/gen/n8n-common-values.yaml`).
+4.  **Upgrade the deployment:** Run `helm upgrade` to apply the new configuration to the running n8n application. Use the `--set` flag to force the image tag update, as the chart may not pick it up otherwise.
+
+    ```bash
+    helm upgrade n8n oci://8gears.container-registry.com/library/n8n --set image.tag=<new_version> -f n8n/gen/n8n-common-values.yaml -f n8n/gen/n8n-service-type-nodeport-neg.yaml -f n8n/gen/n8n-basic-auth-values.yaml
+    ```
+
 ## Key Files
 
 *   `n8n/README.md`: The main guide for manual installation.
@@ -54,4 +73,3 @@ Here are some common issues that you may encounter during the deployment process
 *   `n8n/terraform/main.tf`: The main Terraform configuration file.
 *   `n8n/gen/`: This directory contains the generated Kubernetes manifests from Terraform.
 *   `GEMINI.md`: This file.
-*   `AGENTS.md`: The agent instructions for development of the application

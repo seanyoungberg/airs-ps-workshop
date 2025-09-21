@@ -58,8 +58,6 @@ This file provides the playbook for working in this repo with Codex CLI and othe
 
 ## Security & Configuration
 - Never commit a real `terraform.tfvars`; use the example file as a template.
-- Store secrets in Google Secret Manager or Kubernetes secrets and reference them via Terraform data sources.
-- Rotate service account keys before demos. Document required environment variables in README/guide updates.
 
 ## Quick Checklist for Agents
 - Read `n8n/WORKSHOP.md` before changing lab flow.

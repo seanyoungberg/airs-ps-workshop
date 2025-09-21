@@ -1,40 +1,37 @@
-# Deploying GCP Infra and n8n with Gemini
+# Deploying the n8n Workshop with Gemini
 
-This guide will help you deploy the workshop using the Gemini CLI in Google Cloud Shell. Instead of following a step-by-step manual, you will be interacting with an AI assistant to deploy the infrastructure. This is a great way to learn about the underlying technologies and concepts in a more interactive and exploratory way.
+Welcome to the n8n workshop! This guide will help you deploy the workshop using the Gemini CLI in Google Cloud Shell. Instead of following a step-by-step manual, you will be interacting with an AI assistant to deploy the infrastructure. This is a great way to learn about the underlying technologies and concepts in a more interactive and exploratory way.
 
 ## Getting Started
 
 Before you start interacting with Gemini, it's important to set up your environment correctly.
 
-1.  **Open a New Terminal:** Close any existing terminal windows and open a new one in the Cloud Shell IDE.
+1.  **Open Cloud Shell:** This lab is designed to be run in the Google Cloud Shell IDE. You can open it by navigating to [shell.cloud.google.com](https://shell.cloud.google.com/?show=ide%2Cterminal).
 
-2.  **Change to the Project Directory:**
+2.  **Open a New Terminal:** Inside the Cloud Shell IDE, close any existing terminal windows and open a new one. This will ensure you have a clean environment.
+
+3.  **Change to the Project Directory:**
     ```bash
     cd ~/airs-ps-workshop
     ```
 
-3.  **Authenticate with GCP:** Run the following command to authenticate with Google Cloud. This will allow Gemini to interact with your GCP project.
+4.  **Authenticate with GCP:** Run the following command to authenticate with Google Cloud. This will allow Gemini to interact with your GCP project.
     ```bash
     gcloud auth application-default login
     ```
 
-4.  **Launch the Gemini CLI:** Now, you can launch the Gemini CLI from your terminal by typing `gemini`.
-
-5.  **Provide Initial Context:** To start the deployment, you need to give Gemini some context. A good starting prompt would be:
-    > "I want to deploy the n8n workshop. The main instructions are in the `n8n/README.md` file. Can you help me get started?"
+5.  **Launch the Gemini CLI:** Now, you can launch the Gemini CLI from your terminal by typing `gemini`.
 
 **Note:** Please do not use the Gemini icon in the IDE side panel. Launching the Gemini CLI from the terminal ensures that it runs in the correct directory and inherits the necessary authentication.
 
-## Important Requirements
+## Your Mission: Deploy the n8n Workshop
 
-When you are working with Gemini to deploy the workshop, please make sure that Gemini performs the following two tasks:
+Your goal is to deploy the n8n workshop using Gemini as your assistant. Here are the high-level tasks you need to accomplish. You can ask Gemini to help you with each of these tasks.
 
-1.  **Create a GCS bucket for Terraform remote state:** The Terraform configuration should be stored in a Google Cloud Storage bucket to ensure that the state is managed centrally and not on your local machine.
-2.  **Use the remote state bucket:** All Terraform deployments should be configured to use the GCS bucket for the remote state. This is crucial for collaboration and for recovering from interruptions.
-
-You can ask Gemini to do this by saying something like:
-
-> "Before we deploy the infrastructure, let's make sure we have a GCS bucket for the Terraform remote state. Can you help me create one and configure Terraform to use it?"
+1.  **Understand the Repository:** Ask Gemini to give you an overview of the project and its goals.
+2.  **Create a Remote State Bucket:** Instruct Gemini to create a GCS bucket for your Terraform remote state and configure Terraform to use it.
+3.  **Deploy the Infrastructure:** Ask Gemini to deploy the infrastructure using Terraform.
+4.  **Deploy the Kubernetes Resources:** Once the infrastructure is deployed, ask Gemini to deploy the necessary Kubernetes resources, including Ollama and n8n.
 
 ## Example Prompts and Guidance
 
@@ -49,7 +46,6 @@ The goal of this workshop is to learn by doing. Here are some example prompts to
 ### Deploying the Infrastructure
 
 *   "Let's start by deploying the infrastructure. What's the first step?"
-*   "What is Terraform and why are we using it?"
 *   "Can you explain what this Terraform code does before we apply it?"
 
 ### Troubleshooting

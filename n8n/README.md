@@ -43,10 +43,7 @@ If using Cloud Shell, all tools are pre-installed. Otherwise, install:
 ```bash
 # Clone the workshop repository
 git clone https://github.com/seanyoungberg/airs-ps-workshop.git
-cd airs-ps-workshop/n8n
-
-# Authenticate with GCP
-gcloud auth application-default login
+cd airs-ps-workshop
 ```
 
 ## Step 2: Enable Required APIs
@@ -67,15 +64,16 @@ gcloud services enable \
 ## Step 3: Configure Terraform
 
 ```bash
-cd terraform
+# Create a terraform.tfvars file
+cp n8n/terraform/terraform.tfvars.example n8n/terraform/terraform.tfvars
 
 # Update project ID in terraform.tfvars
-sed -i "s/YOUR_PROJECT_ID/$PROJECT_ID/" terraform.tfvars
+sed -i "s/YOUR_PROJECT_ID/$PROJECT_ID/" n8n/terraform/terraform.tfvars
 
-# Or manually edit terraform.tfvars and set:
+# Or manually edit n8n/terraform/terraform.tfvars and set:
 # project_id = "your-actual-project-id"
 ```
-**Note:** The `terraform.tfvars.example` file is configured to deploy a private GKE cluster by default (`private_cluster = true`). This is the recommended setting for this workshop.
+**Note:** The `terraform.tfvars` file is configured to deploy a private GKE cluster by default (`private_cluster = true`). This is the recommended setting for this workshop.
 
 ## Step 4: Deploy Infrastructure
 
@@ -88,40 +86,40 @@ This step creates:
 
 ```bash
 # Initialize Terraform
-terraform init
+terraform -chdir=n8n/terraform init
 
 # Deploy infrastructure (takes ~15 minutes)
-terraform apply -var-file=terraform.tfvars -auto-approve
+terraform -chdir=n8n/terraform apply -auto-approve
 
 # Save outputs for later use
-terraform output -json > ../outputs.json
+terraform -chdir=n8n/terraform output -json > n8n/outputs.json
 ```
 
 ## Step 5: Configure kubectl Access
 
-For private clusters, use fleet membership:
-
 ```bash
-# Get cluster credentials via fleet membership
-gcloud container fleet memberships get-credentials n8n-tutorial-tf \
-    --project $PROJECT_ID
+# Get cluster credentials
+gcloud container clusters get-credentials n8n-tutorial-tf --region us-central1 --project $PROJECT_ID
 
 # Verify connection
 kubectl get nodes
 ```
-**Note:** It may take a few minutes for the nodes to become available. If `kubectl get nodes` returns no resources, wait a few minutes and try again.
+**Note:** In an Autopilot cluster, nodes are only provisioned when a workload is scheduled. If `kubectl get nodes` returns no resources, this is expected. The nodes will be created automatically when you deploy the first workload (Ollama).
 
 ## Step 6: Deploy Ollama for LLM
 
 ```bash
 # Deploy Ollama
-kubectl apply -f ../gen/ollama.yaml
+kubectl apply -f n8n/gen/ollama.yaml
 
 # Wait for deployment
 kubectl rollout status deployment/ollama
 
+# Get the Ollama pod name
+OLLAMA_POD=$(kubectl get pod -l app=ollama -o jsonpath='{.items[0].metadata.name}')
+
 # Pull the LLM model (this may take a few minutes)
-kubectl exec $(kubectl get pod -l app=ollama -o name) -c ollama -- ollama pull llama3.2
+kubectl exec $OLLAMA_POD -c ollama -- ollama pull llama3.2
 
 # Verify Ollama service
 kubectl get svc ollama
@@ -135,9 +133,9 @@ Our improved configuration includes NodePort with NEG annotation pre-configured:
 # Install n8n via Helm with NEG-enabled NodePort and Terraform-generated basic auth
 helm install n8n oci://8gears.container-registry.com/library/n8n \
     --version 1.0.10 \
-    -f ../gen/n8n-common-values.yaml \
-    -f ../gen/n8n-service-type-nodeport-neg.yaml \
-    -f ../gen/n8n-basic-auth-values.yaml
+    -f n8n/gen/n8n-common-values.yaml \
+    -f n8n/gen/n8n-service-type-nodeport-neg.yaml \
+    -f n8n/gen/n8n-basic-auth-values.yaml
 
 # Wait for deployment
 kubectl rollout status deployment/n8n
@@ -146,18 +144,18 @@ kubectl rollout status deployment/n8n
 kubectl get svc n8n -o yaml | grep neg
 
 # Retrieve the generated HTTP basic-auth credentials
-cat ../gen/n8n-credentials.txt
+cat n8n/gen/n8n-credentials.txt
 
 # Retrieve the generated owner credentials
-cat ../gen/n8n-owner-credentials.txt
+cat n8n/gen/n8n-owner-credentials.txt
 ```
 
 ## Step 8: Deploy Certificate and Ingress
 
 ```bash
 # Apply managed certificate and ingress
-kubectl apply -f ../gen/cert-ingress-managed-cert.yaml
-kubectl apply -f ../gen/cert-ingress-ingress.yaml
+kubectl apply -f n8n/gen/cert-ingress-managed-cert.yaml
+kubectl apply -f n8n/gen/cert-ingress-ingress.yaml
 
 # Get the static IP
 STATIC_IP=$(kubectl get ingress workshop-ingress -n default \
@@ -174,14 +172,8 @@ kubectl get managedcertificate workshop-managed-cert -n default
 Terraform renders a one-shot job to promote the generated credentials to the instance owner.
 
 ```bash
-# Review credentials from Terraform outputs (also stored in ../gen/n8n-owner-credentials.txt)
-cd terraform
-terraform output n8n_owner_email
-terraform output n8n_owner_password
-cd ..
-
 # Apply the owner bootstrap secret + job (idempotent)
-kubectl apply -f ../gen/n8n-owner-bootstrap.yaml
+kubectl apply -f n8n/gen/n8n-owner-bootstrap.yaml
 
 # Watch job logs until it reports success (Ctrl+C when complete)
 kubectl logs job/n8n-owner-bootstrap --follow
@@ -194,20 +186,19 @@ kubectl delete job n8n-owner-bootstrap --ignore-not-found
 
 ### Initial Setup
 1. Access n8n via the HTTPS URL (or HTTP while the certificate provisions).
-2. When prompted for HTTP basic authentication, use `admin` plus the password from `../gen/n8n-credentials.txt`.
-3. On the n8n sign-in screen, use the owner email and password from `../gen/n8n-owner-credentials.txt`.
-4. Update the owner profile as needed after login.
+2. When prompted for HTTP basic authentication, use `admin` plus the password from `n8n/gen/n8n-credentials.txt`.
+3. On the n8n sign-in screen, use the owner email and password from `n8n/gen/n8n-owner-credentials.txt`.
+4. The n8n first login screens can be skipped
 
 ### Database Credentials
 Get the database password for the workflow configuration:
 
 ```bash
 # Get CloudSQL IP
-CLOUDSQL_IP=$(cd terraform && terraform output -raw cloudsql_instance_ip)
+CLOUDSQL_IP=$(terraform -chdir=n8n/terraform output -raw cloudsql_instance_ip)
 
 # Get database password
-DB_PASSWORD=$(kubectl get secret db-secret -o=json \
-    jq -r '.data.password' | base64 -d)
+DB_PASSWORD=$(kubectl get secret db-secret -o=jsonpath='{.data.password}' | base64 -d)
 
 echo "Database Host: $CLOUDSQL_IP"
 echo "Database Name: n8n"
@@ -233,7 +224,7 @@ echo "Database Password: $DB_PASSWORD"
 
 1. In n8n, click "New Workflow"
 2. Click the menu → Import from File
-3. Select `workflow.json` from the repository
+3. Select `n8n/workflow.json` from the repository
 4. Update the Ollama and Postgres credentials in the workflow nodes
 5. Save and activate the workflow
 
@@ -274,22 +265,23 @@ kubectl get svc n8n -o yaml | grep -A2 annotations
 ### Database Connection Issues
 ```bash
 # Test connectivity from n8n pod
-kubectl exec -it $(kubectl get pod -l app=n8n -o name) -- \
+N8N_POD=$(kubectl get pod -l app=n8n -o jsonpath='{.items[0].metadata.name}')
+kubectl exec -it $N8N_POD -- \
     nc -zv $CLOUDSQL_IP 5432
 ```
 
 ### Terraform State Lock
-If a `terraform apply` is interrupted, the state may be locked. You can unlock it by running the following command in the `n8n/terraform` directory:
+If a `terraform apply` is interrupted, the state may be locked. You can unlock it by running the following command:
 ```bash
-terraform force-unlock <LOCK_ID>
+terraform -chdir=n8n/terraform force-unlock -force <LOCK_ID>
 ```
 You can get the `<LOCK_ID>` from the error message of a failed `terraform plan`.
 
 ### Authentication Issues
 If you encounter authentication problems, try running `gcloud auth application-default login` in your terminal.
 
-### Interactive Prompts
-Some commands may require interactive confirmation (e.g., `terraform force-unlock`). If a command hangs, try running it again with a flag to bypass the prompt, such as `-force` or `-auto-approve`.
+### YAML Parsing Errors
+If you encounter a YAML parsing error when applying the `n8n-owner-bootstrap.yaml` file, it may be due to special characters in the generated password. You can edit the `n8n/gen/n8n-owner-bootstrap.yaml` file and wrap the password in quotes to resolve the issue.
 
 ## Cleanup
 
@@ -297,14 +289,13 @@ To remove all resources:
 
 ```bash
 # Delete Kubernetes resources
-kubectl delete -f ../gen/cert-ingress-ingress.yaml
-kubectl delete -f ../gen/cert-ingress-managed-cert.yaml
+kubectl delete -f n8n/gen/cert-ingress-ingress.yaml
+kubectl delete -f n8n/gen/cert-ingress-managed-cert.yaml
 helm uninstall n8n
-kubectl delete -f ../gen/ollama.yaml
+kubectl delete -f n8n/gen/ollama.yaml
 
 # Destroy infrastructure
-cd terraform
-terraform destroy -var-file=terraform.tfvars
+terraform -chdir=n8n/terraform destroy -auto-approve
 
 # Delete the GCP project (optional - removes everything)
 gcloud projects delete $PROJECT_ID
@@ -339,6 +330,3 @@ gcloud projects delete $PROJECT_ID
 - All data is persisted in Cloud SQL
 
 ---
-
-*Workshop Version: 1.1*
-*Last Updated: 2025-09-20*
