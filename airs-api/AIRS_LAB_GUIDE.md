@@ -163,65 +163,79 @@ Please create a markdown file at ~/airs-ps-workshop/my-findings.md with a summar
 
 **Goal:** Gain a deep understanding of how the AIRS integration works.
 
-**Suggested prompts for Gemini:**
-- "Can you explain the AIRS workflow in @airs-api/Prisma_AIRS.json?"
-- "Walk me through the visual flow of the nodes and what each one does"
-- "What happens when a threat is detected at different stages?"
+**Requirements:**
+- Analyze the workflow structure and node configuration
+- Walk through the visual flow chart
+- Check input/output of nodes based on your test executions
 
-**Completion criteria:** Have Gemini write a comprehensive summary of the workflow and suggest creative improvements.
+**Hint:** Reference the workflow file directly with @airs-api/Prisma_AIRS.json when talking to Gemini.
+
+**Completion:** Have Gemini write a comprehensive summary of the workflow and suggest creative improvements.
 
 ### Task 2: Analyze the Malicious Code Behavior
 
-**Goal:** Understand what's happening when malicious code is detected.
+**Goal:** Understand what's happening when the malicious code example is processed.
 
-**Explore with Gemini:**
-- "What is happening with the Ollama output for the malicious code example?"
-- "What does the EICAR test file actually do?"
-- "How do the agent and model handle this threat?"
+**Requirements:**
+- Investigate what's happening with the Ollama output
+- Understand the agent and model level interactions
+- Document what the code actually does
 
-**Completion criteria:** Document the behavior analysis to disk in your IDE.
+**Hint:** Focus on one of the demo queries that triggered interesting behavior.
+
+**Completion:** Summary of the behavior analysis written to disk in your IDE.
 
 ### Task 3: Implement Blocking Profiles
 
 **Goal:** Design and implement an effective blocking strategy.
 
-**Work with Gemini to:**
-- Brainstorm which scan use cases should be enabled for prompts vs. responses
-- Create a logical blocking plan for both profile directions
-- Update your profiles in SCM to block appropriate threats
-- Re-test all demo queries to validate blocking behavior
+**Requirements:**
+- Create a logical plan for both prompt and response profiles
+- Determine which scan use cases should be enabled vs blocked in each direction
+- Update profiles and validate with demo queries
 
-**Completion criteria:** All threat policies (except Database and Agent) are working to block traffic per your plan.
+**Hint:** Consider the user experience impact of blocking at different stages.
+
+**Completion:** All threat policies (except Database and Agent) are working to block traffic per your plan.
 
 ### Task 4: Enhance with Verdict Report Details
 
 **Goal:** Add automated report retrieval to your workflow.
 
-**Collaborate with Gemini:**
-- "How can we query the scan report API to get detailed verdicts?"
-- "Let's add logic to the n8n workflow to automatically pull detailed reports"
-- "Can you help me test the API structure first?"
+**Requirements:**
+- Understand the scan report API structure
+- Add logic to n8n workflow to pull detailed reports automatically
+- Test the implementation with real verdicts
 
-**Completion criteria:** Functional automated loop in n8n that retrieves detailed verdict reports.
+**Hint:** Have Gemini do some direct API queries first to understand the structure.
+
+**Completion:** Functional automated loop in n8n that retrieves detailed verdict reports.
 
 ### Task 5: Create Custom Guardrails
 
 **Goal:** Build and test a custom security topic.
 
-**Steps:**
-1. Design a custom topic with specific examples
-2. Apply it to one of your profiles
-3. Create test prompts to validate detection
+**Requirements:**
+- Design a custom topic with specific examples relevant to your organization
+- Apply it to a profile
+- Create test prompts to validate detection
 
-**Completion criteria:** Working custom guardrail that detects your specific patterns.
+**Hint:** Think about specific threats or content your organization would want to block.
+
+**Completion:** Working custom guardrail that successfully detects your specific patterns.
 
 ### Task 6: System Prompt Engineering
 
-**Goal:** Modify the LLM system prompt to trigger response-side blocks.
+**Goal:** Explore how system prompts affect security responses.
 
-**Challenge:** Can you craft a system prompt that makes the LLM respond in ways that trigger your response profile blocks?
+**Requirements:**
+- Modify the LLM's system prompt
+- Try to influence the model to respond in ways that trigger response-side blocks
+- Document the relationship between system prompts and security
 
-**Completion criteria:** Successfully trigger a block verdict on the response side through system prompt modification.
+**Hint:** Consider how different personas or instructions might affect model output.
+
+**Completion:** Successfully trigger a block verdict on the response side through system prompt modification.
 
 ---
 
